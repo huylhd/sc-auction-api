@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const cors = require('cors');
 const glob = require('glob');
+const errorHandlingMiddleware = require('./middlewares/error-handling.middleware');
 
 // env
 require("dotenv").config();
@@ -31,14 +32,6 @@ routerFiles.forEach(filePath => {
 });
 
 // error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
+app.use(errorHandlingMiddleware);
 
 module.exports = app;

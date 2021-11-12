@@ -22,6 +22,6 @@ const schema = new Schema({
   timestamps: true
 });
 
-schema.index({ productId: 1 });
+schema.index({ productId: 1, userId: 1 });
 
 module.exports = mongoose.model("Bids", schema, "Bids");

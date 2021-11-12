@@ -2,7 +2,7 @@ const ProductModel = require("../../models/product.model");
 
 module.exports = {
   index: async (req, res) => {
-    const productList = await ProductModel.find({ expiredAt: { $gt: new Date() } });
+    const productList = await ProductModel.find({ expiredAt: { $gt: new Date() } }).lean();
 
     return res.status(200).json({
       success: true,
@@ -17,7 +17,7 @@ module.exports = {
     });
 
     if (!created) {
-      return res.status(400).json({
+      return res.status(200).json({
         success: false,
       });
     }
@@ -37,7 +37,7 @@ module.exports = {
     });
 
     if (updated.modifiedCount === 0) {
-      return res.status(400).json({
+      return res.status(200).json({
         success: false,
       });
     }
@@ -69,7 +69,7 @@ module.exports = {
     const productInfo = await ProductModel.findOne({ id });
 
     if (!productInfo) {
-      return res.status(400).json({
+      return res.status(200).json({
         success: false,
       });
     }

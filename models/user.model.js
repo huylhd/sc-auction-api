@@ -9,7 +9,19 @@ const schema = new Schema({
   username: { 
     type: String, 
     required: true
-  }
+  },
+  setting: new Schema({
+    maxAmount: {
+      type: String,
+      default: 0
+    },
+    isAlertOn: {
+      type: Boolean,
+      default: false
+    }
+  }, {
+    _id: false
+  })
 }, {
   timestamps: true
 });

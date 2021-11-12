@@ -16,9 +16,11 @@
     "fastest-validator": "^1.12.0",
     "glob": "^7.2.0",
     "http-errors": "~1.6.3",
+    "ioredis": "^4.28.0",
     "lodash": "^4.17.21",
     "mongoose": "^6.0.12",
     "morgan": "~1.9.1",
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.15",
+    "redlock": "^3.1.2"
   }
 }

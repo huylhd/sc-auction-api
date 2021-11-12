@@ -20,12 +20,22 @@ const ProductModel = require('../models/product.model');
 
     await Promise.all([
       UserModel.create({
+        id: '0', // Admin user
+        username: 'user0'
+      }),
+      UserModel.create({
         id: '1',
-        username: 'user1'
+        username: 'user1',
+        setting: {
+          maxAmount: 30
+        }
       }),
       UserModel.create({
         id: '2',
-        username: 'user2'
+        username: 'user2',
+        setting: {
+          maxAmount: 50
+        }
       }),
       ProductModel.insertMany(docs)
     ].map(p => p.catch(e => e)));
