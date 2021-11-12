@@ -22,6 +22,10 @@ const schema = new Schema({
   expiredAt: { 
     type: Date, 
     default: new Date(Date.now() + 1000 * 60 * 60)
+  },
+  minimumAmount: {
+    type: Number,
+    default: 1
   }
 }, {
   timestamps: true

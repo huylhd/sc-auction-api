@@ -15,7 +15,8 @@ const ProductModel = require('../models/product.model');
         description: `Description for product ${i}`,
         details: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed pharetra, diam id placerat semper, tortor sapien iaculis dui, ac sodales ex felis non nulla. Integer placerat eu enim a gravida. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Nulla eu felis elit. Etiam at tristique ante. Morbi in ornare nisl. Duis varius tempus velit, nec sollicitudin sapien viverra eget. Integer at tincidunt lectus, at semper erat. In hac habitasse platea dictumst. Aliquam feugiat lacus eu metus pharetra pulvinar. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.`,
         expiredAt: new Date(Date.now() + 1000 * 60 * 60 * _.random(1, 10)),
-        imageUrl: `/assets/img${i+1}.jpeg`
+        imageUrl: `/assets/img${i+1}.jpeg`,
+        minimumAmount: _.random(1, 10)
       }
     })
 

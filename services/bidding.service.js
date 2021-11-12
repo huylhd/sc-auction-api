@@ -30,6 +30,10 @@ const placeABid = async (userId, productId, amount) => {
       return "Product not existed or has expired";
     }
 
+    if (productInfo.minimumAmount > amount) {
+      return `The minimum amount allowed for this product is ${productInfo.minimumAmount}`;
+    }
+
     const currentHighest = await BidModel.findOne({
       productId
     }).sort({ amount: -1 }).limit(1).lean();
