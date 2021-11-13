@@ -67,7 +67,7 @@ module.exports = {
   detail: async (req, res) => {
     const { id } = req.params;
 
-    const productInfo = await ProductModel.aggregate([
+    let productInfo = await ProductModel.aggregate([
       {
         $match: {
           id
@@ -136,9 +136,13 @@ module.exports = {
       });
     }
 
+    productInfo = productInfo[0];
+    productInfo.timeLeft = new Date(productInfo.expiredAt).getTime() - Date.now();
+    if (productInfo.timeLeft < 0) productInfo.timeLeft = 0;
+
     return res.status(200).json({
       success: true,
-      data: productInfo[0],
+      data: productInfo
     });
   }
 }
