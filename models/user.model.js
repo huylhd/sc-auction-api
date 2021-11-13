@@ -12,7 +12,7 @@ const schema = new Schema({
   },
   setting: new Schema({
     maxAmount: {
-      type: String,
+      type: Number,
       default: 0
     },
     alertPerc: {
