@@ -12,12 +12,12 @@ const schema = new Schema({
   },
   setting: new Schema({
     maxAmount: {
-      type: String,
+      type: Number,
       default: 0
     },
-    isAlertOn: {
-      type: Boolean,
-      default: false
+    alertPerc: {
+      type: Number,
+      default: 100
     }
   }, {
     _id: false
