@@ -20,6 +20,7 @@ const _ = require('lodash');
 const BidModel = require('../models/bid.model');
 const UserModel = require('../models/user.model');
 const ProductModel = require('../models/product.model');
+let { io } = require('./socket.service');
 
 const placeABid = async (userId, productId, amount) => {
   const lock = await redlock.lock([`placeABid-${productId}`], 5000);
@@ -51,6 +52,11 @@ const placeABid = async (userId, productId, amount) => {
         return "Bid failed";
       }
     }
+
+    try { // Handle socket
+      io().to(productId).emit('bid', amount);
+      getAmountLimit(userId, productId, true, false); // Check alert
+    } catch {}
 
     return null;
   } catch (err) {
@@ -97,7 +103,7 @@ const checkAutoBid = async (productId) => {
       const bidder = bidWithAutoOn[_.random(0, bidWithAutoOn.length - 1)];
       const bidErr = await placeABid(bidder.userId, bidder.productId, amountToBid);
       if (!bidErr) {
-        console.log(`[Auto-bid] User ${bidder.userId} placed a $${amountToBid} bid on product ${bidder.productId}`)
+        console.log(`[Auto-bid] User ${bidder.userId} placed a $${amountToBid} bid on product ${bidder.productId}`);
       }
     }
   }
@@ -107,7 +113,7 @@ const checkAutoBid = async (productId) => {
   }
 }
 
-async function getAmountLimit(userId, productId) {
+async function getAmountLimit(userId, productId, alert = false, exclude = true) {
   const userActiveBids = await BidModel.aggregate([
     {
       $lookup: {
@@ -120,7 +126,7 @@ async function getAmountLimit(userId, productId) {
     {
       $match: {
         userId,
-        productId: { $ne: productId },
+        productId: { $ne: exclude ? productId : null },
         'product.expiredAt': { $gt: new Date() },
         isAutomated: true
       }
@@ -128,7 +134,15 @@ async function getAmountLimit(userId, productId) {
   ])
   const userInfo = await UserModel.findOne({ id: userId }).lean();
 
-  const amountLimit = userInfo.setting.maxAmount - userActiveBids.reduce((acc, cur) => acc + cur.amount, 0);
+  const totalActiveBidAmount = userActiveBids.reduce((acc, cur) => acc + cur.amount, 0);
+  const amountLimit = userInfo.setting.maxAmount - totalActiveBidAmount;
+
+  // Checking alert for user
+  if (alert && totalActiveBidAmount/userInfo.setting.maxAmount*100 >= userInfo.setting.alertPerc) {
+    try { // Handle socket
+      io().to(userId).emit('alert', userInfo.setting.alertPerc);
+    } catch {}
+  }
 
   return amountLimit;
 }
