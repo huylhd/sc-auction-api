@@ -83,7 +83,7 @@ module.exports = {
       },
       {
         $addFields: {
-          highestBids: {
+          highestBid: {
             $first: {
               $filter: {
                 input: '$bids',
@@ -97,13 +97,37 @@ module.exports = {
         }
       },
       {
-        $addFields: {
-          highestBid: '$highestBids.amount'
+        $set: {
+          highestBid: '$highestBid.amount'
         }
       },
       {
-        $unset: ['bids', 'highestBids']
-      }
+        $lookup: {
+          from: 'Bids',
+          let: { productId: '$id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $and: [
+                  { $eq: [ req.authInfo.id, "$userId" ] },
+                  { $eq: [ "$productId", "$$productId" ] }
+                ] }
+              }
+            }
+          ],
+          as: 'myBid'
+        }
+      },
+      {
+        $set: {
+          myBid: {
+            $first: '$myBid'
+          }
+        }
+      },
+      {
+        $unset: ['bids']
+      },
     ])
 
     if (!productInfo || !productInfo.length) {

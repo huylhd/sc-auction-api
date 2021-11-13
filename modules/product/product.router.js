@@ -7,7 +7,7 @@ const router = express.Router();
 
 module.exports = (app) => {
   router.get('/', productController.index);
-  router.get('/:id', productController.detail);
+  router.get('/:id', authenticationMiddleware(), productController.detail);
   router.post('/', authenticationMiddleware('admin'), validationMiddleware(productValidator.create), productController.create);
   router.put('/:id', authenticationMiddleware('admin'), validationMiddleware(productValidator.update), productController.update);
   router.delete('/:id', authenticationMiddleware('admin'), validationMiddleware(productValidator.delete), productController.delete);
