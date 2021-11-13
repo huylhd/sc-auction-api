@@ -8,7 +8,7 @@ const ProductModel = require('../models/product.model');
 
 (async () => {
   try {
-    let docs = Array(10).fill(0).map((val, i) => {
+    let productDocs = Array(10).fill(0).map((val, i) => {
       return {
         id: crypto.randomBytes(16).toString('hex'),
         name: `Product ${i}`,
@@ -20,26 +20,19 @@ const ProductModel = require('../models/product.model');
       }
     })
 
+    let userDocs = Array(4).fill(0).map((val, i) => {
+      return {
+        id: i.toString(),
+        username: `user${i}`,
+        setting: {
+          maxAmount: _.random(40, 60)
+        }
+      }
+    })
+
     await Promise.all([
-      UserModel.create({
-        id: '0', // Admin user
-        username: 'user0'
-      }),
-      UserModel.create({
-        id: '1',
-        username: 'user1',
-        setting: {
-          maxAmount: 30
-        }
-      }),
-      UserModel.create({
-        id: '2',
-        username: 'user2',
-        setting: {
-          maxAmount: 50
-        }
-      }),
-      ProductModel.insertMany(docs)
+      UserModel.insertMany(userDocs),
+      ProductModel.insertMany(productDocs)
     ].map(p => p.catch(e => e)));
   }
   finally {

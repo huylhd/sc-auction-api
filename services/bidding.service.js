@@ -23,6 +23,7 @@ const ProductModel = require('../models/product.model');
 
 const placeABid = async (userId, productId, amount) => {
   const lock = await redlock.lock([`placeABid-${productId}`], 5000);
+  const lock2 = await redlock.lock([`placeABid-${userId}`], 5000);
   try {
     const productInfo = await ProductModel.findOne({ id: productId, expiredAt: { $gt: new Date() } });
 
@@ -58,11 +59,12 @@ const placeABid = async (userId, productId, amount) => {
   }
   finally {
     await lock.unlock();
+    await lock2.unlock();
   }
 }
 
 const checkAutoBid = async (productId) => {
-  const lock = await redlockWithoutRetry.lock('checkAutoBid', 60000); // This checking cycle function only run once at a time
+  const lock = await redlockWithoutRetry.lock(`checkAutoBid${productId}`, 60000); // This checking cycle function only run once at a time
   try {
     const delay = (timeout) => new Promise(res => setTimeout(res, timeout));
     while (true) {
@@ -93,7 +95,10 @@ const checkAutoBid = async (productId) => {
 
       // Choose a random bidder to place bid
       const bidder = bidWithAutoOn[_.random(0, bidWithAutoOn.length - 1)];
-      await placeABid(bidder.userId, bidder.productId, amountToBid);
+      const bidErr = await placeABid(bidder.userId, bidder.productId, amountToBid);
+      if (!bidErr) {
+        console.log(`[Auto-bid] User ${bidder.userId} placed a $${amountToBid} bid on product ${bidder.productId}`)
+      }
     }
   }
   finally {
