@@ -15,9 +15,9 @@ const schema = new Schema({
       type: String,
       default: 0
     },
-    isAlertOn: {
-      type: Boolean,
-      default: false
+    alertPerc: {
+      type: Number,
+      default: 100
     }
   }, {
     _id: false
