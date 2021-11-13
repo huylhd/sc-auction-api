@@ -1,8 +1,9 @@
+const BidModel = require("../../models/bid.model");
 const ProductModel = require("../../models/product.model");
 
 module.exports = {
   index: async (req, res) => {
-    const productList = await ProductModel.find({ expiredAt: { $gt: new Date() } }).lean();
+    const productList = await ProductModel.find({}).sort({ expiredAt: -1}).lean();
 
     return res.status(200).json({
       success: true,
@@ -66,9 +67,46 @@ module.exports = {
   detail: async (req, res) => {
     const { id } = req.params;
 
-    const productInfo = await ProductModel.findOne({ id });
+    const productInfo = await ProductModel.aggregate([
+      {
+        $match: {
+          id
+        }
+      },
+      {
+        $lookup: {
+          from: 'Bids',
+          localField: 'id',
+          foreignField: 'productId',
+          as: 'bids'
+        }
+      },
+      {
+        $addFields: {
+          highestBids: {
+            $first: {
+              $filter: {
+                input: '$bids',
+                as: 'item',
+                cond: {
+                  $eq: ["$$item.amount", { $max: "$bids.amount" }]
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        $addFields: {
+          highestBid: '$highestBids.amount'
+        }
+      },
+      {
+        $unset: ['bids', 'highestBids']
+      }
+    ])
 
-    if (!productInfo) {
+    if (!productInfo || !productInfo.length) {
       return res.status(200).json({
         success: false,
       });
@@ -76,7 +114,7 @@ module.exports = {
 
     return res.status(200).json({
       success: true,
-      data: productInfo,
+      data: productInfo[0],
     });
   }
 }
