@@ -14,3 +14,7 @@ Api for Auction site
 
 5. Start the server:
 ```npm run dev```
+
+### Auto-bid implementation
+- After a bid for an item, check for every auto-bid users for that same item, choose a user and place a higher bid (+1). Loop until no more users to find (delay 1000ms)
+- Implement redlock to prevent concurrency race condition
