@@ -3,7 +3,57 @@ const ProductModel = require("../../models/product.model");
 
 module.exports = {
   index: async (req, res) => {
-    const productList = await ProductModel.find({}).sort({ expiredAt: -1}).lean();
+    const { minimumAmount = 0, arrange = 'expired', category = '' } = req.query;
+    let categoryList = category.split(',').filter(e => e);
+    let productList;
+    if (arrange === 'most-popular') {
+      productList = await ProductModel.aggregate([
+        {
+          $match: {
+            $expr: {
+              $and: [
+                {
+                  $gte: [ '$minimumAmount', parseFloat(minimumAmount) ],
+                },
+                categoryList.length ? {
+                  $in: [ '$category', categoryList ]
+                } : {}
+              ]
+            }
+          }
+        },
+        {
+          $lookup: {
+            from: 'Bids',
+            localField: 'id',
+            foreignField: 'productId',
+            as: 'bids'
+          }
+        },
+        {
+          $addFields: {
+            bidCount: {
+              $size: '$bids'
+            }
+          }
+        },
+        {
+          $unset: 'bids'
+        },
+        {
+          $sort: {
+            bidCount: -1
+          }
+        }
+      ])
+    }
+
+    else {
+      productList = await ProductModel.find({ 
+        minimumAmount: { $gte: minimumAmount },
+        category: categoryList.length ? { $in: categoryList } : { $ne: null }
+      }).sort({ expiredAt: -1}).lean();
+    }
 
     return res.status(200).json({
       success: true,

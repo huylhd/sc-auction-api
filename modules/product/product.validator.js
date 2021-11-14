@@ -16,5 +16,13 @@ module.exports = {
   },
   delete: {
     id: "string|empty:false"
+  },
+  index: {
+    minimumAmount: "string|numeric",
+    arrange: {
+      type: 'enum',
+      values: ['most-popular', 'expired']
+    },
+    category: "string|optional"
   }
 }

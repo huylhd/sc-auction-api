@@ -26,6 +26,10 @@ const schema = new Schema({
   minimumAmount: {
     type: Number,
     default: 1
+  },
+  category: {
+    type: String,
+    default: 'Category 1'
   }
 }, {
   timestamps: true
